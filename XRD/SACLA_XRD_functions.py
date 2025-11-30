@@ -113,3 +113,53 @@ def plot_with_preshot(fpd1_CAKE, fpd1_INT, fpd1_INT_preshot, offset = 20, run_nu
     plt.ylabel('Arbitrary Intensity')
     # plt.xlim(15, 20)
     plt.show()
+
+def process_many_for_waterfall(pyFAI_dict, previously_processed_runs, run_numbers, good_runs, export=False, offset=20, plot_all=False, plot_good=False):
+    fpd1_poni, fpd1_mask, fpd1_map, npt_rad, npt_azim, radial_range, azim_range, units = pyFAI_dict['poni'], pyFAI_dict['mask'], pyFAI_dict['map'], pyFAI_dict['npt_rad'], pyFAI_dict['npt_azim'], pyFAI_dict['radial_range'], pyFAI_dict['azim_range'], pyFAI_dict['units']
+    processed_runs = previously_processed_runs
+    ims_fpd1 = False
+    fpd1_INTs = False
+    fpd1_INTs_no_offset = False
+    new_runs = {}
+    for idx, run_number in enumerate(run_numbers):
+        try:
+            fpd1_CAKE, fpd1_INT = processed_runs[run_number]['CAKE'], processed_runs[run_number]['INT']
+        except:
+            im_fpd1 = get_XRD_image(run_number, plot=False)
+        
+            if isinstance(ims_fpd1, bool):
+                ims_fpd1 = im_fpd1
+            else:
+                ims_fpd1 = np.dstack((ims_fpd1, im_fpd1))
+        
+            # pyFAI integration for VAREX 1
+            fpd1_CAKE = fpd1_poni.integrate2d_ng(im_fpd1 * fpd1_map, npt_rad, npt_azim, azimuth_range=azim_range, radial_range=radial_range, correctSolidAngle=True, polarization_factor=1, unit=units, mask=fpd1_mask)
+            fpd1_INT = fpd1_poni.integrate1d_ng(im_fpd1 * fpd1_map, npt_rad, azimuth_range=azim_range, radial_range=radial_range, correctSolidAngle=True, polarization_factor=1, unit=units, mask=fpd1_mask)
+    
+            processed_runs[run_number] = {}
+            processed_runs[run_number]['CAKE'] = fpd1_CAKE
+            processed_runs[run_number]['INT'] = fpd1_INT
+            new_runs[run_number] = processed_runs[run_number]
+        
+        if plot_all:
+            plot(fpd1_CAKE, fpd1_INT, run_number=run_number)
+        elif plot_good:
+            if run_number in good_runs:
+                plot(fpd1_CAKE, fpd1_INT, run_number=run_number)
+            elif run_number in new_runs:
+                plot(fpd1_CAKE, fpd1_INT, run_number=run_number)
+        else:
+            if run_number in new_runs:
+                plot(fpd1_CAKE, fpd1_INT, run_number=run_number)
+    
+        if isinstance(fpd1_INTs, bool):
+            fpd1_INTs = fpd1_INT.intensity + (idx*offset)
+            fpd1_INTs_no_offset = fpd1_INT.intensity
+        else:
+            fpd1_INTs = np.vstack((fpd1_INTs, fpd1_INT.intensity + (idx*offset)))
+            fpd1_INTs_no_offset = np.vstack((fpd1_INTs_no_offset, fpd1_INT.intensity))
+    
+        if export:
+            lineout_exportrun = np.stack((fpd1_INT.radial, fpd1_INT.intensity),axis=1)
+            np.savetxt(f'xys/{run_number}.xy',lineout_exportrun)
+    return processed_runs, new_runs, fpd1_INTs, fpd1_INTs_no_offset, fpd1_INT
