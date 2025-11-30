@@ -93,7 +93,7 @@ def plot(fpd1_CAKE, fpd1_INT, run_number = None):
     # plt.xlim(15, 20)
     plt.show()
 
-def plot_with_preshot(fpd1_CAKE, fpd1_INT, fpd1_INT_preshot, run_number = None):
+def plot_with_preshot(fpd1_CAKE, fpd1_INT, fpd1_INT_preshot, offset = 20, run_number = None):
     # This is all to plot the below graphs
     plt.figure(figsize = (25, 8))
     if run_number is not None:
@@ -107,7 +107,7 @@ def plot_with_preshot(fpd1_CAKE, fpd1_INT, fpd1_INT_preshot, run_number = None):
     # Plot of the 1D lineouts
     plt.subplot(122)
     plt.plot(fpd1_INT.radial, fpd1_INT.intensity)
-    plt.plot(fpd1_INT_preshot.radial, fpd1_INT_preshot.intensity)
+    plt.plot(fpd1_INT_preshot.radial, fpd1_INT_preshot.intensity+offset)
     # plt.semilogy()
     plt.xlabel('Theta (Degrees) or Q ($\\AA^{-1}$)')
     plt.ylabel('Arbitrary Intensity')
