@@ -73,9 +73,11 @@ def get_XRD_shot_preshot(shot_run_number, preshot_run_number, experiment_path = 
     return dark_subtracted_im_fpd1_shot, dark_subtracted_im_fpd1_preshot
     
 
-def plot(fpd1_CAKE, fpd1_INT):
+def plot(fpd1_CAKE, fpd1_INT, run_number = None):
     # This is all to plot the below graphs
     plt.figure(figsize = (25, 8))
+    if run_number is not None:
+        plt.title(f"Run: {run_number}")
     # Plot of the cakes
     plt.subplot(121)
     plt.pcolormesh(fpd1_CAKE.radial, fpd1_CAKE.azimuthal, np.log10(fpd1_CAKE.intensity), cmap = 'plasma')
@@ -91,9 +93,11 @@ def plot(fpd1_CAKE, fpd1_INT):
     # plt.xlim(15, 20)
     plt.show()
 
-def plot_with_preshot(fpd1_CAKE, fpd1_INT, fpd1_INT_preshot):
+def plot_with_preshot(fpd1_CAKE, fpd1_INT, fpd1_INT_preshot, run_number = None):
     # This is all to plot the below graphs
     plt.figure(figsize = (25, 8))
+    if run_number is not None:
+        plt.title(f"Run: {run_number}")
     # Plot of the cakes
     plt.subplot(121)
     plt.pcolormesh(fpd1_CAKE.radial, fpd1_CAKE.azimuthal, np.log10(fpd1_CAKE.intensity), cmap = 'plasma')
